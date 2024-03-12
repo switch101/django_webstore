@@ -1,0 +1,40 @@
+{% extends "store/base.html" %}
+{% load static %}
+
+{% block title %}My Orders{% endblock %}
+
+{% block content %}
+    <div class="container mt-5 mb-5">
+        <div class="row">
+            <div class="col-md-12">
+                <h2>My Orders</h2>
+                {% if orders %}
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Order ID</th>
+                                <th>Total Price</th>
+                                <th>Status</th>
+                                <th>Created At</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for order in orders %}
+                                <tr>
+                                    <td>{{ order.id }}</td>
+                                    <td>{{ order.total_price }}</td>
+                                    <td>{{ order.status }}</td>
+                                    <td>{{ order.created_at }}</td>
+                                    <td><a href="{% url 'order:order_detail' order.id %}">View Details</a></td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                {% else %}
+                    <p>No orders found. <a href="{% url 'store:product_all' %}">Start shopping now!</a></p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+{% endblock %}

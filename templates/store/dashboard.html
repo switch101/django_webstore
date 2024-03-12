@@ -1,0 +1,147 @@
+{% extends "store/base.html" %}
+{% load static %}
+
+{% block title %}Dashboard{% endblock %}
+
+{% block content %}
+    <div class="container">
+        <h1 class="text-center mt-4 mb-4">Welcome to the BookStore Dashboard</h1>
+        <h3 class="text-center mt-4 mb-4">You are now interacting as {{ user.username }}</h3>
+        <div class="row">
+            <div class="col-md-6">
+                <div class="card h-100 mb-4">
+                    <div class="card-header">
+                        <h2 class="card-title">Books</h2>
+                    </div>
+                    <div class="card-body" style="max-height: 500px; overflow-y: auto;">
+                        <a href="{% url 'store:add_book' %}" class="btn btn-primary mb-3">Add Book</a>
+                        <a href="{% url 'store:add_category' %}" class="btn btn-primary mb-3">Add Category</a>
+                        <a href="{% url 'store:view_all_books' %}" class="btn btn-primary mb-3">View all Books</a>
+
+                        <table class="table">
+                            <thead>
+                            <tr>
+                                <th>Title</th>
+                                <th>Author</th>
+                                <th>Price</th>
+                                <th>Stock</th>
+                                <th>Action</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            {% for book in products|slice:"-5:" %}
+                                <tr>
+                                    <td>{{ book.title }}</td>
+                                    <td>{{ book.author }}</td>
+                                    <td>
+                                        {% if book.discounted_price %}
+                                            <span class="text-muted"><del>{{ book.price }} RON</del></span><br>
+                                            <span class="text-black">{{ book.discounted_price }} RON</span>
+                                        {% else %}
+                                            RON{{ book.price }}
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ book.stock }}</td>
+                                    <td>
+                                        <a href="{% url 'store:edit_product' slug=book.slug %}"
+                                           class="btn btn-sm btn-info">Edit</a>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card h-100 mb-4">
+                    <div class="card-header">
+                        <h2 class="card-title">Orders</h2>
+                    </div>
+                    <div class="card-body" style="max-height: 500px; overflow-y: auto;">
+                        <a href="{% url 'order:order_list' %}" class="btn btn-primary mb-3">View All Orders</a>
+
+                        <table class="table">
+                            <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Order Date</th>
+                                <th>Name</th>
+                                <th>Surname</th>
+                                <th>Total</th>
+                                <th>Status</th>
+                                <th>Action</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            {% for order in orders|slice:"-5:" %}
+                                <tr>
+                                    <td>{{ order.id }}</td>
+                                    <td>{{ order.created_at }}</td>
+                                    <td>{{ order.user.name }}</td>
+                                    <td>{{ order.user.surname }}</td>
+                                    <td>{{ order.total_price }}</td>
+                                    <td>{{ order.status }}</td>
+                                    <td><a href="{% url 'order:order_detail' order.id %}"
+                                           class="btn btn-sm btn-info">View</a></td>
+                                </tr>
+                            {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row mt-4">
+            <div class="col-md-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h2 class="card-title">Sales Chart</h2>
+                    </div>
+                    <div class="card-body">
+                        <canvas id="sales-chart" style="max-height: 300px;"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="mb-5"></div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            var ctx = document.getElementById('sales-chart').getContext('2d');
+            var salesChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: [{% for order in orders %}
+                        {% if order.status == 'Done' %}
+                            '{{ order.created_at }}',
+                        {% endif %}
+                    {% endfor %}
+                    ],
+                    datasets: [{
+                        label: 'Sales',
+                        data: [{% for order in orders %}
+                            {% if order.status == 'Done' %}
+                                {{ order.total_price }},
+                            {% endif %}
+                        {% endfor %}
+                        ],
+                        backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                        borderColor: 'rgba(54, 162, 235, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+        });
+    </script>
+{% endblock %}

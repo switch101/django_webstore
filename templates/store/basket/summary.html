@@ -1,0 +1,127 @@
+{% extends "store/base.html" %}
+{% load static %}
+{% block title %}Cart Summary{% endblock %}
+{% block content %}
+
+<main class="pt-5">
+  <div class="container">
+    <h1 class="h5">Shopping Cart</h1>
+    {% if basket %}
+    {% for item in basket %}
+    {% with product=item.product %}
+    <div data-index="{{product.id}}" class="row mb-4 border product-item">
+      <div class="col-md-3 col-lg-2 order-md-first bg-light">
+        <img class="img-fluid mx-auto d-block" width="120px" alt="Responsive image" src="{{ product.image.url }}">
+      </div>
+      <div class="col-md-9 col-lg-10 ps-md-3 ps-lg-10">
+        <a href="{{ product.get_absolute_url }}" class="text-decoration-none text-reset">
+          <h1 class="h5 pt-2">{{ product.title }}</h1>
+        </a>
+        <div class="border">
+          <div class="col border-bottom">
+            <div class="row p-3">
+              <div class="col-6">Hardback Book</div>
+              <div class="col-6 text-end">
+                {% if product.discounted_price %}
+                  <span class="text-muted"><del>{{ product.price }} RON</del></span><br>
+                  <span class="h6 fw-bold">{{ product.discounted_price }} RON</span>
+                {% else %}
+                  <span class="h6 fw-bold">{{ product.price }} RON</span>
+                {% endif %}
+              </div>
+            </div>
+          </div>
+          <div class="col">
+            <div class="row p-3">
+              <div class="col-12">
+                <label for="select{{product.id}}">Qty</label>
+                <select id="select{{product.id}}">
+                  <option value="{{ item.qty }}" selected>{{ item.qty }}</option>
+                  <option value="1">1</option>
+                  <option value="2">2</option>
+                  <option value="3">3</option>
+                  <option value="4">4</option>
+                </select>
+                <button type="button" id="update-button" data-index="{{product.id}}"
+                  class="btn btn-outline-secondary btn-sm update-button">
+                  Update
+                </button>
+                <button type="button" id="delete-button" data-index="{{product.id}}"
+                  class="btn btn-outline-secondary btn-sm delete-button">
+                  Delete
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    {% endwith %}
+    {% endfor %}
+    <div class="col-12 text-end">
+      <div class="h6 fw-bold">Sub Total: <div id="subtotal" class="d-inline-flex">{{ basket.get_subtotal_price}} RON</div></div>
+      <div class="h6 fw-bold">Shipping: <div id="shipping" class="d-inline-flex">30 RON</div></div>
+      <hr>
+      <div class="h6 fw-bold">Total: <div id="total" class="d-inline-flex">{{ basket.get_total_price }} RON</div></div>
+      <a href="{% url 'basket:checkout' %}" class="btn btn-primary mt-3" style="margin-bottom: 50px">Proceed to Checkout</a>
+    </div>
+    {% else %}
+    <div class="col-12">
+      <p>Your shopping cart is empty.<a href="{% url 'store:product_all' %}"> Go back to the main page</a></p>
+    </div>
+    {% endif %}
+  </div>
+</main>
+
+<script>
+  $(document).on('click', '.delete-button', function (e) {
+    e.preventDefault();
+    var prodid = $(this).data('index');
+    $.ajax({
+      type: 'POST',
+      url: '{% url "basket:basket_delete" %}',
+      data: {
+        productid: $(this).data('index'),
+        csrfmiddlewaretoken: "{{ csrf_token }}",
+        action: 'post'
+      },
+      success: function (json) {
+        $('.product-item[data-index="' + prodid + '"]').remove();
+        document.getElementById("subtotal").innerHTML = json.subtotal;
+        if (json.qty === 0) {
+          document.getElementById("shipping").innerHTML = "0 RON";
+          document.getElementById("total").innerHTML = json.subtotal + " RON";
+          location.reload();
+        } else {
+          document.getElementById("total").innerHTML = (parseFloat(json.subtotal) + 30).toFixed(2) + " RON";
+        }
+        document.getElementById("basket-qty").innerHTML = json.qty;
+      },
+      error: function (xhr, errmsg, err) {}
+    });
+  })
+
+  $(document).on('click', '.update-button', function (e) {
+    e.preventDefault();
+    var prodid = $(this).data('index');
+    $.ajax({
+      type: 'POST',
+      url: '{% url "basket:basket_update" %}',
+      data: {
+        productid: $(this).data('index'),
+        productqty: $('#select' + prodid + ' option:selected').text(),
+        csrfmiddlewaretoken: "{{ csrf_token }}",
+        action: 'post'
+      },
+      success: function (json) {
+    document.getElementById("basket-qty").innerHTML = json.qty;
+    document.getElementById("subtotal").innerHTML = (parseFloat(json.subtotal-30)).toFixed(2) + " RON";
+    document.getElementById("total").innerHTML = (parseFloat(json.subtotal)).toFixed(2) + " RON";
+},
+      error: function (xhr, errmsg, err) {}
+    });
+  })
+</script>
+
+
+{% endblock %}

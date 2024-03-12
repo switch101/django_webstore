@@ -1,0 +1,89 @@
+{% extends "store/base.html" %}
+
+{% block content %}
+    <main>
+        <section class="py-5 text-center container">
+            <div class="row py-lg-3">
+                <div class="col-lg-6 col-md-8 mx-auto">
+                    <h1 class="h1 fw-bold" style="color: white">Edit Book</h1>
+                </div>
+            </div>
+        </section>
+
+        <div class="container" style="margin-top: -100px">
+            <div class="row justify-content-center">
+                <div class="col-lg-6">
+                    <form method="post" enctype="multipart/form-data" class="mt-5" id="editBookForm">
+                        {% csrf_token %}
+                        <h2 class="mb-4 text-center">Edit Book</h2>
+                        <div class="mb-3">
+                            <label for="title" class="form-label">Title</label>
+                            <input type="text" class="form-control" id="title" name="title" placeholder="Enter title"
+                                   value="{{ product.title }}">
+                        </div>
+                        <div class="mb-3">
+                            <label for="author" class="form-label">Author</label>
+                            <input type="text" class="form-control" id="author" name="author" placeholder="Enter author"
+                                   value="{{ product.author }}">
+                        </div>
+                        <div class="mb-3">
+                            <label for="category" class="form-label">Category</label>
+                            <select class="form-select" id="category" name="category">
+                                {% for category in categories %}
+                                    <option value="{{ category.id }}" {% if category.id == product.category.id %}
+                                            selected {% endif %}>{{ category.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div id="newCategoryInput" class="mb-3" style="display: none;">
+                            <label for="newCategory" class="form-label">New Category</label>
+                            <input type="text" class="form-control" id="newCategory" name="newCategory"
+                                   placeholder="Enter new category">
+                        </div>
+                        <div class="mb-3">
+                            <label for="description" class="form-label">Description</label>
+                            <textarea class="form-control" id="description" name="description"
+                                      placeholder="Enter description">{{ product.description }}</textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label for="image" class="form-label">Image</label>
+                            <input type="file" class="form-control" id="image" name="image" accept="image/*"
+                                   placeholder="Choose image">
+                        </div>
+                        <div class="mb-3">
+                            <label for="price" class="form-label">Price</label>
+                            <input type="number" class="form-control" id="price" name="price" placeholder="Enter price"
+                                   value="{{ product.price }}">
+                        </div>
+                        <div class="mb-3">
+                            <label for="discounted_price" class="form-label">Discounted Price</label>
+                            <input type="number" class="form-control" id="discounted_price" name="discounted_price"
+                                   placeholder="Enter discounted price" value="{{ product.discounted_price }}">
+                        </div>
+                        <div class="mb-3">
+                            <label for="sku" class="form-label">SKU</label>
+                            <input type="text" class="form-control" id="sku" name="sku" placeholder="Enter SKU"
+                                   value="{{ product.sku }}">
+                        </div>
+                        <div class="mb-3">
+                            <label for="stock" class="form-label">Stock</label>
+                            <input type="number" class="form-control" id="stock" name="stock" placeholder="Enter stock"
+                                   value="{{ product.stock }}">
+                        </div>
+                        <div class="mb-3 form-check">
+                            <input type="checkbox" class="form-check-input" id="in_stock" name="in_stock"
+                                    {% if product.in_stock %} checked {% endif %}>
+                            <label class="form-check-label" for="in_stock">In Stock</label>
+                        </div>
+                        <div class="mb-3 form-check">
+                            <input type="checkbox" class="form-check-input" id="is_active" name="is_active"
+                                    {% if product.is_active %} checked {% endif %}>
+                            <label class="form-check-label" for="is_active">Is Active</label>
+                        </div>
+                        <button type="submit" class="btn btn-primary" style="margin-bottom: 50px">Save</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </main>
+{% endblock %}

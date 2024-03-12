@@ -1,0 +1,284 @@
+{% extends "store/base.html" %}
+{% load static %}
+
+{% block stylesheet %}
+    <style>
+        .product-details-container {
+            margin-top: 50px;
+        }
+
+        .product-details-image {
+            border-radius: 10px;
+        }
+
+        .recommended-products-container {
+            margin-top: 50px;
+        }
+
+        .recommended-product-card {
+            height: 100%;
+            transition: transform 0.3s ease;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .recommended-product-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .recommended-product-img {
+            object-fit: cover;
+            height: 100%;
+            width: 100%;
+            border-radius: 10px;
+        }
+
+        .recommended-product-card-body {
+            height: 100%;
+        }
+
+        #reviews-carousel {
+            display: none;
+        }
+    </style>
+{% endblock %}
+
+{% block title %}
+    {% if product %}{{ product.title }}{% else %}Product{% endif %}
+{% endblock %}
+
+{% block content %}
+    <div id="success-message" class="alert alert-success mt-3" style="display: none;">Product added to cart
+        successfully
+    </div>
+    <div class="spacer"></div>
+    </div>
+    <main class="pt-5">
+    <div class="container product-details-container">
+        <div class="row g-3">
+            <div class="col-md-5 ps-3 col-lg-5 order-md-last p-0 order-1">
+                <div class="d-grid gap-2">
+                    <div class="d-flex d-flex-inline justify-content-between">
+                        <div>
+                            {% if product.discounted_price %}
+                                <span class="h3">{{ product.discounted_price }} RON</span>
+
+                                <span class="h5" style="text-decoration: line-through;color: red">{{ product.price }} RON</span>
+                            {% else %}
+                                <span class="h3">{{ product.price }} RON</span>
+                            {% endif %}
+                            <p class="text-muted">includes VAT</p>
+                        </div>
+                        <div>
+                            <label for="select">Qty</label>
+                            <select id="select" class="h6 store-select-dropdown">
+                                <option value="1">1</option>
+                                <option value="2">2</option>
+                                <option value="3">3</option>
+                                <option value="4">4</option>
+                            </select>
+                        </div>
+                    </div>
+                    <hr>
+                    {% if product.stock > 0 %}
+                        <button type="button" id="add-button" value="{{ product.id }}" class="btn btn-success fw500">Add
+                            to Cart
+                        </button>
+                    {% else %}
+                        <button type="button" class="btn btn-outline-secondary fw500" disabled>Out of Stock</button>
+                    {% endif %}
+                    <button type="button" id="add-to-favorites" value="{{ product.id }}"
+                            class="btn btn-outline-primary fw500">
+                        <i class="fas fa-heart"></i> Add to Favorites
+                    </button>
+                </div>
+                <div>
+                    <p style="margin-top: 10px" class="text-muted">SKU: {{ product.sku }}</p>
+                    <p style="margin-top: 10px">{{ product.description }}</p>
+                </div>
+            </div>
+            <div class="col-md-7 col-lg-7 p-0">
+                <div class="card mb-3 border-0">
+                    <div class="row g-0">
+                        <div class="col-md-12">
+                            <div class="card-body p-1">
+                                <h1 class="mb-0 h2 pe-4 pb-4">{{ product.title }}</h1>
+                                <h3 class="mb-0 h4 pe-4 pb-4">{{ product.author }}</h3>
+                                <div class="bg-light">
+                                    <img class="img-fluid mx-auto d-block product-details-image" width="200px"
+                                         alt="Responsive image" src="{{ product.image.url }}">
+                                </div>
+                                {% if product.rating %}
+                                <h5 style="margin-top: 15px" class="card-text">
+                                    Rating: {{ avg_rating|floatformat:1 }}⭐</h5>
+                                {% else %}
+                                <h5 style="margin-top: 15px" class="card-text">
+                                    Rating: No rating yet</h5>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container recommended-products-container mt-5">
+        <h4 style="margin-bottom: 25px">Recommended from the same category</h4>
+        <div class="row row-cols-1 row-cols-md-5 g-3">
+            {% for recommended_product in recommended_products %}
+                <div class="col">
+                    <div class="card recommended-product-card">
+                        <a href="{{ recommended_product.get_absolute_url }}">
+                            <img src="{{ recommended_product.image.url }}" class="card-img-top recommended-product-img"
+                                 alt="...">
+                        </a>
+                        <div class="card-body recommended-product-card-body">
+                            <h5 class="card-title">{{ recommended_product.title }}</h5>
+                            <p class="card-text">{{ recommended_product.author }}</p>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <div class="container mt-5">
+        <h2>Leave a Review</h2>
+        {% if user.is_authenticated %}
+            {% if user_has_reviewed %}
+                <div class="container mt-5">
+                    <p>Thank you! You already left a review for this book.</p>
+                </div>
+            {% else %}
+                <div class="container mt-5">
+                    <form id="review-form" class="review-form visible" method="post">
+                        {% csrf_token %}
+                        <input type="hidden" name="product_id" value="{{ product.id }}">
+                        <div class="mb-3">
+                            <label for="id_rating" class="form-label">Rating:</label>
+                            <input type="number" id="id_rating" name="star_rating" min="1" max="5" class="form-control">
+                        </div>
+                        <div class="mb-3">
+                            <label for="id_review" class="form-label">Review:</label>
+                            <textarea id="id_review" name="review" class="form-control"></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Submit</button>
+                    </form>
+                </div>
+            {% endif %}
+        {% else %}
+            <div class="container mt-5">
+                <p>You need to <a href="{% url 'signin' %}">sign in</a> in order to leave a review.</p>
+            </div>
+        {% endif %}
+    </div>
+    <div class="container mt-5" style="margin-bottom: 50px">
+        <h2 style="margin-bottom: 25px">Customer Reviews</h2>
+        {% if product.reviews.exists %}
+            <div id="reviews-carousel" class="carousel slide" data-bs-ride="carousel" style="display: block;">
+                <div class="carousel-inner">
+                    {% for review_list_item in product.reviews.all %}
+                        <div class="carousel-item {% if forloop.first %}active{% endif %}">
+                            <div class="card mx-auto" style="width: 18rem;">
+                                <div class="card-body">
+                                    <h5 class="card-title">{{ review_list_item.user.username }}</h5>
+                                    <p class="card-text">Rating: {{ review_list_item.star_rating| floatformat:1 }}⭐</p>
+                                    <p class="card-text">{{ review_list_item.review }}</p>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+                <button class="carousel-control-prev" type="button" data-bs-target="#reviews-carousel" data-bs-slide="prev">
+                    <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                    <span class="visually-hidden">Previous</span>
+                </button>
+                <button class="carousel-control-next" type="button" data-bs-target="#reviews-carousel" data-bs-slide="next">
+                    <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                    <span class="visually-hidden">Next</span>
+                </button>
+            </div>
+        {% else %}
+            <p>No reviews yet.</p>
+        {% endif %}
+    </div>
+    </main>
+    <script>
+        $(document).on('click', '#add-button', function (e) {
+            e.preventDefault();
+            $.ajax({
+                type: 'POST',
+                url: '{% url "basket:basket_add" %}',
+                data: {
+                    productid: $(this).val(),
+                    productqty: $('#select option:selected').text(),
+                    csrfmiddlewaretoken: "{{ csrf_token }}",
+                    action: 'post'
+                },
+                success: function (json) {
+                    document.getElementById("basket-qty").innerHTML = json.qty;
+                    $('#success-message').text('Product added to cart successfully').fadeIn().delay(3000).fadeOut();
+                },
+                error: function (xhr, errmsg, err) {
+                }
+            });
+        });
+
+        $('#review-form').submit(function (e) {
+            e.preventDefault();
+            var formData = $(this).serialize();
+            $.ajax({
+                type: 'POST',
+                url: '{% url "store:submit_review" %}',
+                data: formData,
+                success: function (response) {
+                    var newReviewHtml = `
+                <div class="carousel-item">
+                    <div class="card mx-auto" style="width: 18rem;">
+                        <div class="card-body">
+                            <h5 class="card-title">${response.username}</h5>
+                            <p class="card-text">Rating: ${response.rating}⭐</p>
+                            <p class="card-text">${response.review}</p>
+                        </div>
+                    </div>
+                </div>
+            `;
+                    $('#reviews-carousel .carousel-inner').append(newReviewHtml);
+                    $('#id_review').val('');
+                    $('#id_rating').val('');
+                    window.location.reload(false);
+                },
+                error: function (xhr, errmsg, err) {
+                    console.log('Error:', errmsg);
+                }
+            });
+        });
+
+        $(document).on('click', '#add-to-favorites', function (e) {
+            e.preventDefault();
+            var productId = $(this).val();
+            if (productId) {
+                var addToFavoritesUrl = "{% url 'store:add_to_favorites' product_id=0 %}".replace('0', productId);
+                $.ajax({
+                    type: 'POST',
+                    url: addToFavoritesUrl,
+                    data: {
+                        product_id: productId,
+                        csrfmiddlewaretoken: "{{ csrf_token }}"
+                    },
+                    success: function (response) {
+                        alert(response.message);
+                    },
+                    error: function (xhr, status, error) {
+                        console.error(xhr.responseText);
+                    }
+                });
+            } else {
+                console.error("Product ID is empty.");
+            }
+        });
+
+    </script>
+
+{% endblock %}

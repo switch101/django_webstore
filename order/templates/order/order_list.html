@@ -1,0 +1,79 @@
+    {% extends "store/base.html" %}
+    {% load static %}
+
+    {% block title %}Order List{% endblock %}
+
+    {% block content %}
+        <div class="container mt-5 mb-5">
+            <div class="row">
+                <div class="col-md-10 offset-md-1">
+                    <div class="card">
+                        <div class="card-header">
+                            <h2 class="card-title">Order List</h2>
+                            <a href="{% url 'store:dashboard' %}" class="btn btn-primary mb-3">Back to Dashboard</a>
+
+                        </div>
+
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-bordered">
+                                    <thead>
+                                    <tr>
+                                        <th>Order ID</th>
+                                        <th>Name</th>
+                                        <th>Surname</th>
+                                        <th>Email</th>
+                                        <th>Phone Number</th>
+                                        <th>City</th>
+                                        <th>Total Price</th>
+                                        <th>Status</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                    {% for order in orders %}
+                                        <tr>
+                                            <td>{{ order.id }}</td>
+                                            <td>{{ order.user.username }}</td>
+                                            <td>{{ order.user.surname }}</td>
+                                            <td>{{ order.user.email }}</td>
+                                            <td>{{ order.user.phone_number }}</td>
+                                            <td>{{ order.user.city }}</td>
+                                            <td>{{ order.total_price }}</td>
+                                            <td>
+                                                <form method="post" action="{% url 'order:update_status' order.id %}">
+                                                    {% csrf_token %}
+                                                    <select name="status" class="form-select" onchange="this.form.submit()">
+                                                        <option value="New Order"
+                                                                {% if order.status == 'New Order' %}selected{% endif %}>New
+                                                            Order
+                                                        </option>
+                                                        <option value="Processing"
+                                                                {% if order.status == 'Processing' %}selected{% endif %}>
+                                                            Processing
+                                                        </option>
+                                                        <option value="Done"
+                                                                {% if order.status == 'Done' %}selected{% endif %}>Done
+                                                        </option>
+                                                        <option value="Cancelled"
+                                                                {% if order.status == 'Cancelled' %}selected{% endif %}>
+                                                            Cancelled
+                                                        </option>
+                                                    </select>
+                                                </form>
+                                            </td>
+                                            <td>
+                                                <a href="{% url 'order:order_detail' order.id %}"
+                                                   class="btn btn-primary btn-sm">View Details</a>
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% endblock %}

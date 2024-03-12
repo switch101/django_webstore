@@ -1,0 +1,94 @@
+{% extends "store/base.html" %}
+{% load static %}
+{% block title %}
+    Favorites
+{% endblock %}
+{% block content %}
+
+    <style>
+        .card {
+            height: 100%;
+            transition: transform 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .card img {
+            object-fit: cover;
+            height: 100%;
+            width: 100%;
+        }
+
+        .card-body {
+            height: 100%;
+        }
+    </style>
+
+    <main>
+        <div class="album py-5 bg-light">
+            <div class="container">
+                    <h4>Favorites</h4>
+
+                <div class="pb-3 h5">{{ category.name|title }}</div>
+
+                {% if favorite_products %}
+                    <div class="row row-cols-1 row-cols-sm-2 row-cols-md-5 g-3">
+                        {% for product in favorite_products %}
+                            <div class="col" style="margin-bottom: 50px">
+                                <a href="{{ product.get_absolute_url }}" class="text-dark text-decoration-none">
+                                    <div class="card shadow-sm">
+                                        <img class="card-img-top banner-image" alt="Responsive image"
+                                             src="{{ product.image.url }}">
+                                        <div class="card-body">
+                                            <h5 class="card-title">{{ product.title }}</h5>
+                                            <p class="card-text">{{ product.author }}</p>
+                                            <p class="card-text">{{ product.price }} RON</p>
+                                            {% if product.rating > 0 %}
+                                                <p class="card-text">Rating: {{ product.rating|floatformat:1 }}⭐</p>
+                                            {% else %}
+                                                <p class="card-text">No rating yet</p>
+                                            {% endif %}
+                                            <button type="button" id="remove-from-favorites-btn-{{ product.id }}"
+                                                    class="btn btn-danger fw500"
+                                                    onclick="removeFromFavorites({{ product.id }})">Remove from Favorites
+                                            </button>
+
+                                        </div>
+                                    </div>
+                                </a>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <p>There are no products in your Favorite Books list. <a href="{% url 'store:product_all' %}">Go back to the main page</a></p>
+                {% endif %}
+            </div>
+        </div>
+    </main>
+
+
+<script>
+    function removeFromFavorites(productId) {
+        console.log("Remove from favorites clicked for product ID:", productId);
+
+        $.ajax({
+            type: "POST",
+            url: "{% url 'store:remove_from_favorites' product_id=9999 %}".replace('9999', productId),
+            data: {
+                'csrfmiddlewaretoken': '{{ csrf_token }}'
+            },
+            success: function(data) {
+                location.reload(); 
+            },
+            error: function(xhr, errmsg, err) {
+                alert('Error removing product from favorites');
+            }
+        });
+    }
+</script>
+
+
+{% endblock %}

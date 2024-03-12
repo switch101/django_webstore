@@ -1,0 +1,99 @@
+{% extends "store/base.html" %}
+{% load static %}
+
+{% block title %}Order Detail{% endblock %}
+
+{% block content %}
+<div class="container mt-5 mb-5">
+    <div class="row">
+        <div class="col-md-8 offset-md-2">
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title">Order Detail</h2>
+                </div>
+                <div class="card-body">
+                    <p class="list-group-item"><strong>Order placed at:</strong> {{ order.created_at}}</p>
+
+                    <h4>Order Status</h4>
+                    <div class="card-body">
+                        <form method="post" action="{% url 'order:update_status' order.id %}">
+                            {% csrf_token %}
+                            <select name="status" class="form-select" {% if not request.user.is_staff %}disabled{% endif %} onchange="this.form.submit()">
+                                <option value="New Order" {% if order.status == 'New Order' %}selected{% endif %}>New Order</option>
+                                <option value="Processing" {% if order.status == 'Processing' %}selected{% endif %}>Processing</option>
+                                <option value="Done" {% if order.status == 'Done' %}selected{% endif %}>Done</option>
+                                <option value="Cancelled" {% if order.status == 'Cancelled' %}selected{% endif %}>Cancelled</option>
+                            </select>
+                        </form>
+                    </div>
+                    <h4>User Information</h4>
+                    <ul class="list-group mb-4">
+                        <li class="list-group-item"><strong>Name:</strong> {{ order.user.name }}</li>
+                        <li class="list-group-item"><strong>Surname:</strong> {{ order.user.surname }}</li>
+                        <li class="list-group-item"><strong>Delivery Address:</strong> {{ order.user.address }}</li>
+                        <li class="list-group-item"><strong>City:</strong> {{ order.user.city }}</li>
+                        <li class="list-group-item"><strong>ZIP Code:</strong> {{ order.user.zip_code }}</li>
+                        <li class="list-group-item"><strong>Email:</strong> {{ order.user.email }}</li>
+                        <li class="list-group-item"><strong>Phone Number:</strong> {{ order.user.phone_number }}</li>
+                    </ul>
+                    <h4>Order Items</h4>
+                    <div class="table-responsive">
+                        <table class="table table-bordered mb-4">
+                            <thead>
+                                <tr>
+                                    <th>Product Image</th>
+                                    <th>Product Title</th>
+                                    <th>SKU</th>
+                                    <th>Quantity</th>
+                                    <th>Price</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for item in order.orderitem_set.all %}
+                                <tr>
+                                    <td style="text-align: center;"><img src="{{ item.product.image.url }}" class="img-thumbnail" alt="{{ item.product.title }}" style="width: 150px; height: 150px;"></td>
+                                    <td>{{ item.product.title }}</td>
+                                    <td>{{ item.product.sku }}</td>
+                                    <td>{{ item.quantity }}</td>
+                                    <td>
+                                        {% if item.product.discounted_price %}
+                                            <del>{{ item.product.price }} RON</del> {{ item.product.discounted_price }} RON
+                                        {% else %}
+                                            {{ item.product.price }} RON
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    <h4>Order Summary</h4>
+                    <table class="table table-bordered mb-4">
+                        <tbody>
+                            <tr>
+                                <td><strong>Subtotal:</strong></td>
+                                <td>{{ order.total_price|add:-30|floatformat:2 }} RON</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Shipping:</strong></td>
+                                <td>30.00 RON</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Total:</strong></td>
+                                <td>{{ order.total_price|floatformat:"2" }} RON</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="card-footer text-muted">
+                    {% if not request.user.is_staff %}
+                        <a href="{% url 'order:my_orders' %}" class="btn btn-primary">Back to My Orders</a>
+                    {% else %}
+                        <a href="{% url 'order:order_list' %}" class="btn btn-primary">Back to Orders</a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

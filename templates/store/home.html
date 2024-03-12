@@ -1,0 +1,182 @@
+{% extends "store/base.html" %}
+{% load static %}
+
+{% block title %}BookStore{% endblock %}
+
+{% block content %}
+
+<style>
+    .card {
+        transition: transform 0.3s ease;
+        border-radius: 10px;
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+        position: relative;
+    }
+
+    .card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .card img {
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+        padding: 10px;
+    }
+
+    .card-body {
+        flex-grow: 1;
+        padding: 1rem;
+        min-height: 150px;
+    }
+
+    .card-title {
+        font-size: 1.25rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .card-text {
+        font-size: 1rem;
+        color: #6c757d;
+    }
+
+    .btn-outline-light {
+        border-radius: 30px;
+        padding: 15px 30px;
+        border: 2px solid #ccc;
+        background-color: transparent;
+        color: white;
+    }
+
+    .container-bg {
+        background-image: url('media/images/banner.jpg');
+        background-size: cover;
+        background-position: center;
+        padding-top: 200px;
+    }
+
+    .uk-search {
+        margin-top: 20px;
+        margin-bottom: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .uk-search-input {
+        border-radius: 30px;
+        padding: 15px 30px;
+        font-size: 18px;
+        border: 1px solid #ccc;
+        margin-right: 10px;
+        width: 400px;
+    }
+
+    .row-center {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .out-of-stock-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(169, 169, 169, 0.7);
+        color: white;
+        font-size: 1.5rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 1;
+        pointer-events: none;
+    }
+
+    .discount-badge {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        background-color: red;
+        color: white;
+        padding: 5px 10px;
+        border-radius: 50%;
+        font-size: 0.8rem;
+    }
+
+    .disable-animation:hover {
+        transform: none;
+        box-shadow: none;
+    }
+</style>
+
+<main>
+    <section class="py-5 text-center container-bg">
+        <div class="row-center">
+            <div class="col-lg-6 col-md-8 mx-auto">
+                <h1 class="h1 fw-bold" style="color: white">Search, Read, Buy, Review</h1>
+                <form action="{% url 'store:product_search' %}" method="GET" class="uk-search uk-search-navbar">
+                    <input class="uk-search-input" type="search" placeholder="Search for a book or author..."
+                           name="query">
+                    <button class="btn btn-outline-light" type="submit"><span uk-search-icon>Search</span></button>
+                </form>
+            </div>
+        </div>
+    </section>
+
+    <div class="album py-5 bg-light">
+        <div class="container">
+            {% for category in categories %}
+                {% if category.products.exists and category%}
+                    <div class="pb-3 h5">{{ category.name }}</div>
+                {% endif %}
+                <div class="row row-cols-1 row-cols-sm-2 row-cols-md-5 g-3">
+                    {% for product in category.products.all %}
+                        {% if product.is_active %}
+                            <div class="col" style="margin-bottom: 50px">
+                                <a class="text-dark text-decoration-none" href="{{ product.get_absolute_url }}">
+                                    <div class="card shadow-sm {% if product.stock == 0 %} disable-animation {% endif %}">
+                                        <div class="card-img-container">
+                                            <img class="card-img" src="{{ product.image.url }}" alt="Product Image">
+                                            {% if product.stock == 0 %}
+                                                <div class="out-of-stock-overlay">Out of Stock</div>
+                                            {% endif %}
+                                            {% if product.discounted_price %}
+                                                <div class="discount-badge">{{ product.calculate_discount_percentage }} % off</div>
+                                            {% endif %}
+                                        </div>
+                                        <div class="card-body">
+                                            <h5 class="card-title">{{ product.title }}</h5>
+                                            <p class="card-text">{{ product.author }}</p>
+                                            <p class="card-text">
+                                                {% if product.discounted_price %}
+                                                    <span class="text-muted"><del>{{ product.price }} RON</del></span><br>
+                                                    <span class="text">{{ product.discounted_price }} RON</span><br>
+                                                    <small>Save {{ product.calculate_discount_percentage }}%</small>
+                                                {% else %}
+                                                    {{ product.price }} RON
+                                                {% endif %}
+                                            </p>
+                                            {% if product.rating > 0 %}
+                                                <p class="card-text">Rating: {{ product.rating }}⭐</p>
+                                            {% else %}
+                                                <p class="card-text">No rating yet</p>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </a>
+                            </div>
+                        {% endif %}
+                    {% endfor %}
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+</main>
+
+{% endblock %}

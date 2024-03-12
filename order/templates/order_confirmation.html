@@ -1,0 +1,10 @@
+{% extends "store/base.html" %}
+{% block title %}Order Confirmation{% endblock %}
+
+{% block content %}
+    <section class="py-5 text-center container-bg">
+        <h1>Order Confirmation</h1>
+        <p>Your order with ID {{ order.id }} has been successfully placed.</p>
+        <a href="{% url 'store:product_all' %}" class="btn btn-primary mb-3">Back Store</a>
+    </section>
+{% endblock %}

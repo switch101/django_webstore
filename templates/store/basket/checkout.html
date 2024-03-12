@@ -1,0 +1,100 @@
+    {% extends "store/base.html" %}
+    {% load static %}
+    {% block title %}Basket Summary{% endblock %}
+    {% block content %}
+    
+    <main class="pt-5">
+      <div class="container">
+    
+        <div class="mb-5">
+          <h2>Checkout</h2>
+          <div class="mb-3">
+            <label for="name" class="form-label">Name:</label>
+            <input type="text" class="form-control" id="name" name="name" value="{{ user.name }}">
+          </div>
+          <div class="mb-3">
+            <label for="surname" class="form-label">Surname:</label>
+            <input type="text" class="form-control" id="surname" name="surname" value="{{ user.surname }}">
+          </div>
+          <div class="mb-3">
+            <label for="address" class="form-label">Address:</label>
+            <input type="text" class="form-control" id="address" name="address" value="{{ user.address }}">
+          </div>
+          <div class="mb-3">
+            <label for="city" class="form-label">City:</label>
+            <input type="text" class="form-control" id="city" name="city" value="{{ user.city }}">
+          </div>
+          <div class="mb-3">
+            <label for="zip_code" class="form-label">Zip Code:</label>
+            <input type="text" class="form-control" id="zip_code" name="zip_code" value="{{ user.zip_code }}">
+          </div>
+          <div class="mb-3">
+            <label for="email" class="form-label">Email:</label>
+            <input type="email" class="form-control" id="email" name="email" value="{{ user.email }}">
+          </div>
+          <div class="mb-3">
+            <label for="phone_number" class="form-label">Phone Number:</label>
+            <input type="text" class="form-control" id="phone_number" name="phone_number" value="{{ user.phone_number }}">
+          </div>
+        </div>
+    
+        <div class="mb-5">
+          <h2>Cart Items</h2>
+          {% for item in basket %}
+          {% with product=item.product %}
+          <div data-index="{{product.id}}" class="row mb-4 border product-item">
+            <div class="col-md-3 col-lg-2 order-md-first bg-light">
+              <img class="img-fluid mx-auto d-block" width="120px" alt="Responsive image" src="{{ product.image.url }}">
+            </div>
+            <div class="col-md-9 col-lg-10 ps-md-3 ps-lg-10">
+              <a href="{{ product.get_absolute_url }}" class="text-decoration-none text-reset">
+                <h1 class="h5 pt-2">{{ product.title }}</h1>
+              </a>
+              <div class="border">
+                <div class="col border-bottom">
+                  <div class="row p-3">
+                    <div class="col-6">Hardback Book</div>
+                    <div class="col-6 text-end">
+                      {% if product.discounted_price %}
+                        <span class="text-muted"><del>{{ product.price }} RON</del></span><br>
+                        <span class="h6 fw-bold">{{ product.discounted_price }} RON</span>
+                      {% else %}
+                        <span class="h6 fw-bold">{{ product.price }} RON</span>
+                      {% endif %}
+                    </div>
+                  </div>
+                </div>
+                <div class="col">
+                  <div class="row p-3">
+                    <div class="col-12">
+                      <label for="select">Qty</label>
+                      <select id="select{{product.id}}" disabled>
+                        <option selected>{{item.qty}}</option>
+                      </select>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <input type="hidden" name="basket[]" value="{{ product.id }}">
+          {% endwith %}
+          {% endfor %}
+        </div>
+    
+        <div class="col-12 text-end">
+          <div class="h6 fw-bold">Sub Total: <div id="subtotal" class="d-inline-flex">{{basket.get_subtotal_price}} RON</div></div>
+          <div class="h6 fw-bold">Shipping: 30 RON</div>
+          <hr>
+          <div class="h6 fw-bold">Total: <div id="total" class="d-inline-flex">{{basket.get_total_price}} RON</div></div>
+          <form method="POST" action="{% url 'order:place_order' %}">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-primary mt-3" style="margin-bottom: 50px">Place Order</button>
+          </form>
+        </div>
+      </div>
+    </main>
+    
+    {% endblock %}
+
+
