@@ -48,11 +48,15 @@ def logout_view(request):
 @login_required(login_url='account/signin')
 def account_settings(request):
     if request.method == 'POST':
-        form = UserUpdateForm(request.POST, instance=request.user)
+        form = UserUpdateForm(request.POST, request.FILES, instance=request.user)
         if form.is_valid():
             form.save()
+            messages.success(request, 'Your profile has been updated successfully.')
             return redirect('account_settings')
-
+        else:
+            # Print form errors to console for debugging
+            print(form.errors)
+            messages.error(request, 'Please correct the errors below.')
     else:
         form = UserUpdateForm(instance=request.user)
 

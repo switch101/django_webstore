@@ -10,6 +10,7 @@ class CustomUser(AbstractUser):
     zip_code = models.CharField(max_length=10, blank=True, null=True)
     email = models.EmailField(unique=True)
     phone_number = models.CharField(max_length=20)
+    profile_picture = models.ImageField(default='default.jpg', upload_to='profile_pics')
 
     groups = models.ManyToManyField('auth.Group', related_name='customuser_groups')
     user_permissions = models.ManyToManyField('auth.Permission', related_name='customuser_user_permissions')
