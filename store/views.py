@@ -40,7 +40,6 @@ def category_list(request, category_slug=None):
                   {'category': category, 'products': products, 'sort': sort_option})
 
 
-@login_required(login_url='/accounts/signin/')
 def product_detail(request, slug):
     product = get_object_or_404(Product, slug=slug)
     if product.is_active and product.in_stock:
@@ -48,9 +47,10 @@ def product_detail(request, slug):
         recommended_products = Product.objects.filter(category=product.category).exclude(id=product.id)[:5]
         user_has_reviewed = False
         avg_rating = reviews.aggregate(Avg('star_rating'))['star_rating__avg']
-        in_favorites = request.user.favorite_products.filter(pk=product.pk).exists()
+        in_favorites = False
 
         if request.user.is_authenticated:
+            in_favorites = request.user.favorite_products.filter(pk=product.pk).exists()
             user_has_reviewed = product.reviews.filter(user=request.user).exists()
 
             if request.method == 'POST':

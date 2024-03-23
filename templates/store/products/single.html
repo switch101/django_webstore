@@ -89,15 +89,23 @@
                         {% else %}
                             <button type="button" class="btn btn-outline-secondary fw500" disabled>Out of Stock</button>
                         {% endif %}
-                        {% if in_favorites %}
-        <button type="button" onclick="removeFromFavorites({{ product.id }})" class="btn btn-outline-primary fw500">
-            <i class="fas fa-heart"></i> Remove from Favorites
-        </button>
-    {% else %}
-        <button type="button" id="add-to-favorites" value="{{ product.id }}" class="btn btn-outline-primary fw500">
-            <i class="fas fa-heart"></i> Add to Favorites
-        </button>
-    {% endif %}
+                        {% if user.is_authenticated %}
+                            {% if in_favorites %}
+                                <button type="button" onclick="removeFromFavorites({{ product.id }})"
+                                        class="btn btn-outline-primary fw500">
+                                    <i class="fas fa-heart"></i> Remove from Favorites
+                                </button>
+                            {% else %}
+                                <button type="button" id="add-to-favorites" value="{{ product.id }}"
+                                        class="btn btn-outline-primary fw500">
+                                    <i class="fas fa-heart"></i> Add to Favorites
+                                </button>
+                            {% endif %}
+                        {% else %}
+                            <button type="button" class="btn btn-outline-primary fw500" disabled>
+                                <i class="fas fa-heart"></i> Add to Favorites
+                            </button>
+                        {% endif %}
                     </div>
                     <div>
                         <p style="margin-top: 10px" class="text-muted">SKU: {{ product.sku }}</p>
@@ -216,38 +224,38 @@
             {% endif %}
         </div>
     </main>
-<script>
-    $(document).ready(function() {
-        $(document).on('click', '#add-button', function(e) {
-            e.preventDefault();
-            $.ajax({
-                type: 'POST',
-                url: '{% url "basket:basket_add" %}',
-                data: {
-                    productid: $(this).val(),
-                    productqty: $('#select option:selected').text(),
-                    csrfmiddlewaretoken: "{{ csrf_token }}",
-                    action: 'post'
-                },
-                success: function(json) {
-                    document.getElementById("basket-qty").innerHTML = json.qty;
-                    $('#success-message').text('Product added to cart successfully').fadeIn().delay(3000).fadeOut();
-                },
-                error: function(xhr, errmsg, err) {
-                    console.error(xhr.responseText);
-                }
+    <script>
+        $(document).ready(function () {
+            $(document).on('click', '#add-button', function (e) {
+                e.preventDefault();
+                $.ajax({
+                    type: 'POST',
+                    url: '{% url "basket:basket_add" %}',
+                    data: {
+                        productid: $(this).val(),
+                        productqty: $('#select option:selected').text(),
+                        csrfmiddlewaretoken: "{{ csrf_token }}",
+                        action: 'post'
+                    },
+                    success: function (json) {
+                        document.getElementById("basket-qty").innerHTML = json.qty;
+                        $('#success-message').text('Product added to cart successfully').fadeIn().delay(3000).fadeOut();
+                    },
+                    error: function (xhr, errmsg, err) {
+                        console.error(xhr.responseText);
+                    }
+                });
             });
-        });
 
-        $('#review-form').submit(function(e) {
-            e.preventDefault();
-            var formData = $(this).serialize();
-            $.ajax({
-                type: 'POST',
-                url: '{% url "store:submit_review" %}',
-                data: formData,
-                success: function(response) {
-                    var newReviewHtml = `
+            $('#review-form').submit(function (e) {
+                e.preventDefault();
+                var formData = $(this).serialize();
+                $.ajax({
+                    type: 'POST',
+                    url: '{% url "store:submit_review" %}',
+                    data: formData,
+                    success: function (response) {
+                        var newReviewHtml = `
                         <div class="carousel-item">
                             <div class="card mx-auto" style="width: 18rem;">
                                 <div class="card-body">
@@ -258,63 +266,63 @@
                             </div>
                         </div>
                     `;
-                    $('#reviews-carousel .carousel-inner').append(newReviewHtml);
-                    $('#id_review').val('');
-                    $('#id_rating').val('');
-                    window.location.reload(false);
-                },
-                error: function(xhr, errmsg, err) {
-                    console.error('Error:', errmsg);
-                }
+                        $('#reviews-carousel .carousel-inner').append(newReviewHtml);
+                        $('#id_review').val('');
+                        $('#id_rating').val('');
+                        window.location.reload(false);
+                    },
+                    error: function (xhr, errmsg, err) {
+                        console.error('Error:', errmsg);
+                    }
+                });
             });
-        });
 
-        $(document).on('click', '#add-to-favorites', function(e) {
-            e.preventDefault();
-            var productId = $(this).val();
-            var addToFavoritesUrl = "{% url 'store:add_to_favorites' product_id=0 %}".replace('0', productId);
-            var $addToFavoritesBtn = $(this);
+            $(document).on('click', '#add-to-favorites', function (e) {
+                e.preventDefault();
+                var productId = $(this).val();
+                var addToFavoritesUrl = "{% url 'store:add_to_favorites' product_id=0 %}".replace('0', productId);
+                var $addToFavoritesBtn = $(this);
 
-            $.ajax({
-                type: 'POST',
-                url: addToFavoritesUrl,
-                data: {
-                    product_id: productId,
-                    csrfmiddlewaretoken: "{{ csrf_token }}"
-                },
-                success: function(response) {
-                    $addToFavoritesBtn.replaceWith(`
+                $.ajax({
+                    type: 'POST',
+                    url: addToFavoritesUrl,
+                    data: {
+                        product_id: productId,
+                        csrfmiddlewaretoken: "{{ csrf_token }}"
+                    },
+                    success: function (response) {
+                        $addToFavoritesBtn.replaceWith(`
                         <button type="button" id="remove-from-favorites" data-product-id="${productId}"
                                 class="btn btn-outline-primary fw500" onclick="removeFromFavorites(${productId})">
                             <i class="fas fa-heart"></i> Remove from Favorites
                         </button>
                     `);
-                },
-                error: function(xhr, status, error) {
-                    console.error(xhr.responseText);
-                }
+                    },
+                    error: function (xhr, status, error) {
+                        console.error(xhr.responseText);
+                    }
+                });
             });
         });
-    });
 
-    function removeFromFavorites(productId) {
-        console.log("Remove from favorites clicked for product ID:", productId);
+        function removeFromFavorites(productId) {
+            console.log("Remove from favorites clicked for product ID:", productId);
 
-        $.ajax({
-            type: "POST",
-            url: "{% url 'store:remove_from_favorites' product_id=9999 %}".replace('9999', productId),
-            data: {
-                'csrfmiddlewaretoken': '{{ csrf_token }}'
-            },
-            success: function(data) {
-                location.reload();
-            },
-            error: function(xhr, errmsg, err) {
-                alert('Error removing product from favorites');
-            }
-        });
-    }
-</script>
+            $.ajax({
+                type: "POST",
+                url: "{% url 'store:remove_from_favorites' product_id=9999 %}".replace('9999', productId),
+                data: {
+                    'csrfmiddlewaretoken': '{{ csrf_token }}'
+                },
+                success: function (data) {
+                    location.reload();
+                },
+                error: function (xhr, errmsg, err) {
+                    alert('Error removing product from favorites');
+                }
+            });
+        }
+    </script>
 
 
 
