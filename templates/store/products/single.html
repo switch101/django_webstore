@@ -123,10 +123,9 @@
         </div>
     </div>
 
-<div class="container recommended-products-container mt-5">
-    <h4 style="margin-bottom: 25px">Recommended from the same category</h4>
-    <div class="row row-cols-1 row-cols-md-5 g-3">
-        {% if recommended_products %}
+    <div class="container recommended-products-container mt-5">
+        <h4 style="margin-bottom: 25px">Recommended from the same category</h4>
+        <div class="row row-cols-1 row-cols-md-5 g-3">
             {% for recommended_product in recommended_products %}
                 <div class="col">
                     <div class="card recommended-product-card">
@@ -141,11 +140,7 @@
                     </div>
                 </div>
             {% endfor %}
-        {% else %}
-            <p>No other books in this category...</p>
-        {% endif %}
-    </div>
-</div>
+        </div>
     </div>
 
     <div class="container mt-5">

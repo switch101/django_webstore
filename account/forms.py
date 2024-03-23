@@ -8,12 +8,11 @@ class CustomUserCreationForm(UserCreationForm):
     class Meta(UserCreationForm.Meta):
         model = CustomUser
         fields = (
-            'username', 'password1', 'password2', 'name', 'surname', 'profile_picture', 'address', 'city', 'zip_code',
-            'email', 'phone_number')
+            'username', 'password1', 'password2', 'name', 'surname', 'address', 'city', 'zip_code', 'email',
+            'phone_number')
 
 
 class UserUpdateForm(forms.ModelForm):
     class Meta:
         model = CustomUser
-        fields = ['username', 'name', 'surname', 'profile_picture', 'address', 'city', 'zip_code', 'email',
-                  'phone_number']
+        fields = ['username', 'name', 'surname', 'address', 'city', 'zip_code', 'email', 'phone_number']

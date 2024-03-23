@@ -10,10 +10,6 @@
             <div class="col-md-12">
                 <div class="card mb-4">
                     <div class="card-body">
-                        <h4>Search</h4>
-                        <div class="form-group" style = "margin-bottom: 25px">
-                            <input type="text" id="searchInput" class="form-control" placeholder="Search by title...">
-                        </div>
                         <a href="{% url 'store:add_book' %}" class="btn btn-primary mb-3">Add Book</a>
                         <a href="{% url 'store:dashboard' %}" class="btn btn-primary mb-3">Back to Dashboard</a>
 
@@ -30,7 +26,7 @@
                                 <th>Action</th>
                             </tr>
                             </thead>
-                            <tbody id="bookTableBody">
+                            <tbody>
                             {% for book in all_books %}
                                 <tr>
                                     <td><img src="{{ book.image.url }}" alt="{{ book.title }}"
@@ -61,19 +57,4 @@
             </div>
         </div>
     </div>
-
-    <script>
-        document.getElementById('searchInput').addEventListener('input', function () {
-            var filter = this.value.toLowerCase();
-            var rows = document.getElementById('bookTableBody').getElementsByTagName('tr');
-            for (var i = 0; i < rows.length; i++) {
-                var title = rows[i].getElementsByTagName('td')[1].innerText.toLowerCase();
-                if (title.includes(filter)) {
-                    rows[i].style.display = '';
-                } else {
-                    rows[i].style.display = 'none';
-                }
-            }
-        });
-    </script>
 {% endblock %}

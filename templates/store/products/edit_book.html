@@ -35,7 +35,11 @@
                                 {% endfor %}
                             </select>
                         </div>
-                       
+                        <div id="newCategoryInput" class="mb-3" style="display: none;">
+                            <label for="newCategory" class="form-label">New Category</label>
+                            <input type="text" class="form-control" id="newCategory" name="newCategory"
+                                   placeholder="Enter new category">
+                        </div>
                         <div class="mb-3">
                             <label for="description" class="form-label">Description</label>
                             <textarea class="form-control" id="description" name="description"
@@ -69,7 +73,7 @@
                         <div class="mb-3 form-check">
                             <input type="checkbox" class="form-check-input" id="in_stock" name="in_stock"
                                     {% if product.in_stock %} checked {% endif %}>
-                            <label class="form-check-label" for="in_stock" >In Stock</label>
+                            <label class="form-check-label" for="in_stock">In Stock</label>
                         </div>
                         <div class="mb-3 form-check">
                             <input type="checkbox" class="form-check-input" id="is_active" name="is_active"
