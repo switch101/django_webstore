@@ -1,5 +1,5 @@
 from django.contrib.auth.decorators import login_required
-from django.db.models import Q, Avg, Case, FloatField, When, F
+from django.db.models import Q, Avg
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
 
@@ -194,5 +194,5 @@ def edit_product(request, slug):
 
 
 def view_all_books(request):
-    all_books = Product.objects.all()  # Assuming Product is your model for books
+    all_books = Product.objects.all()
     return render(request, 'store/products/all_books.html', {'all_books': all_books})
