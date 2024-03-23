@@ -6,55 +6,79 @@
 {% block content %}
     <div class="container">
         <h1 class="text-center mt-4 mb-4">All Books</h1>
-        <div class="row">
-            <div class="col-md-12">
-                <div class="card mb-4">
-                    <div class="card-body">
-                        <a href="{% url 'store:add_book' %}" class="btn btn-primary mb-3">Add Book</a>
-                        <a href="{% url 'store:dashboard' %}" class="btn btn-primary mb-3">Back to Dashboard</a>
 
-                        <table class="table">
-                            <thead>
-                            <tr>
-                                <th>Image</th>
-                                <th>Title</th>
-                                <th>Author</th>
-                                <th>Category</th>
-                                <th>Description</th>
-                                <th>Price</th>
-                                <th>Stock</th>
-                                <th>Action</th>
-                            </tr>
-                            </thead>
-                            <tbody>
-                            {% for book in all_books %}
-                                <tr>
-                                    <td><img src="{{ book.image.url }}" alt="{{ book.title }}"
-                                             style="max-width: 100px;"></td>
-                                    <td>{{ book.title }}</td>
-                                    <td>{{ book.author }}</td>
-                                    <td>{{ book.category }}</td>
-                                    <td>{{ book.description }}</td>
-                                    <td>
-                                        {% if book.discounted_price %}
-                                            <span class="text-muted"><del>{{ book.price }} RON</del></span><br>
-                                            <span class="text-black">{{ book.discounted_price }} RON</span>
-                                        {% else %}
-                                            RON{{ book.price }}
-                                        {% endif %}
-                                    </td>
-                                    <td>{{ book.stock }}</td>
-                                    <td>
-                                        <a href="{% url 'store:edit_product' slug=book.slug %}"
-                                           class="btn btn-sm btn-info">Edit</a>
-                                    </td>
-                                </tr>
-                            {% endfor %}
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
+        <h4>Search:</h4>
+        <input type="text" class="form-control mb-3" id="title-search" placeholder="Search by title...">
+
+        <div class="card mb-4">
+            <div class="card-body">
+                <a href="{% url 'store:add_book' %}" class="btn btn-primary mb-3">Add Book</a>
+                <a href="{% url 'store:dashboard' %}" class="btn btn-primary mb-3">Back to Dashboard</a>
+
+                <table class="table">
+                    <thead>
+                    <tr>
+                        <th>Image</th>
+                        <th>Title</th>
+                        <th>Author</th>
+                        <th>Category</th>
+                        <th>Description</th>
+                        <th>Price</th>
+                        <th>Stock</th>
+                        <th>Action</th>
+                    </tr>
+                    </thead>
+                    <tbody id="books-table">
+                    {% for book in all_books %}
+                        <tr>
+                            <td><img src="{{ book.image.url }}" alt="{{ book.title }}"
+                                     style="max-width: 100px;"></td>
+                            <td>{{ book.title }}</td>
+                            <td>{{ book.author }}</td>
+                            <td>{{ book.category }}</td>
+                            <td>{{ book.description }}</td>
+                            <td>
+                                {% if book.discounted_price %}
+                                    <span class="text-muted"><del>{{ book.price }} RON</del></span><br>
+                                    <span class="text-black">{{ book.discounted_price }} RON</span>
+                                {% else %}
+                                    RON{{ book.price }}
+                                {% endif %}
+                            </td>
+                            <td>{{ book.stock }}</td>
+                            <td>
+                                <a href="{% url 'store:edit_product' slug=book.slug %}"
+                                   class="btn btn-sm btn-info">Edit</a>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
             </div>
         </div>
     </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const titleSearch = document.getElementById('title-search');
+            const booksTable = document.getElementById('books-table');
+            const allBooks = Array.from(booksTable.getElementsByTagName('tr'));
+
+            titleSearch.addEventListener('input', filterBooks);
+
+            function filterBooks() {
+                const titleFilter = titleSearch.value.toLowerCase();
+
+                allBooks.forEach(function (bookRow) {
+                    const title = bookRow.getElementsByTagName('td')[1].innerText.toLowerCase();
+
+                    if (title.includes(titleFilter)) {
+                        bookRow.style.display = '';
+                    } else {
+                        bookRow.style.display = 'none';
+                    }
+                });
+            }
+        });
+    </script>
 {% endblock %}
