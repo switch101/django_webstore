@@ -1,6 +1,6 @@
 from django.contrib.auth.decorators import login_required
-from django.db.models import Q, Avg
-from django.http import JsonResponse, HttpResponseServerError
+from django.db.models import Q, Avg, Case, FloatField, When, F
+from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
 
 from order.models import Order
@@ -21,8 +21,23 @@ def product_all(request):
 def category_list(request, category_slug=None):
     category = get_object_or_404(Category, slug=category_slug)
     products = Product.objects.filter(category=category, is_active=True).annotate(
-        avg_rating=Avg('reviews__star_rating'))
-    return render(request, 'store/products/category.html', {'category': category, 'products': products})
+        avg_rating=Avg('reviews__star_rating')
+    )
+    sort_option = request.GET.get('sort')
+
+    if sort_option == 'price_asc':
+        products = products.order_by('price')
+    elif sort_option == 'price_desc':
+        products = products.order_by('-price')
+    elif sort_option == 'name_asc':
+        products = products.order_by('title')
+    elif sort_option == 'name_desc':
+        products = products.order_by('-title')
+    else:
+        products = products.order_by('-avg_rating')
+
+    return render(request, 'store/products/category.html',
+                  {'category': category, 'products': products, 'sort': sort_option})
 
 
 def product_detail(request, slug):
