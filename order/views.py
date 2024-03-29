@@ -1,7 +1,9 @@
+from django.core.mail import send_mail
 from django.shortcuts import render, redirect, get_object_or_404
 from django.http import HttpResponseServerError
 
 from basket.basket import Basket
+from django_webstore import settings
 from store.models import Product
 from .forms import OrderForm
 from .models import Order
@@ -16,17 +18,25 @@ def place_order(request):
         if form.is_valid():
             try:
                 basket = Basket(request)
-                for item in basket:
-                    product = item['product']
-                    quantity = item['qty']
                 user = request.user
                 order = create_order_from_basket(user, basket)
+
+                # Update product stock and save
                 for item in basket:
                     product = item['product']
                     quantity = item['qty']
                     product.stock -= quantity
                     product.save()
+
+                # Clear basket after successful order
                 request.session['skey'] = {}
+
+                # Send email confirmation to user
+                subject = 'Order Confirmation'
+                message = 'Your order has been placed successfully.'
+                recipient_list = [request.user.email]
+                send_mail(subject, message, None, recipient_list)  # Update here
+
                 return redirect('order:order_confirmation', order_id=order.id)
             except Exception as e:
                 print("Error:", e)
@@ -39,7 +49,7 @@ def order_confirmation(request, order_id):
     user = request.user
     order = Order.objects.get(id=order_id)
     products = Product.objects.filter(created_by=user)
-    return render(request, 'order_confirmation.html', {'order': order,'products':products})
+    return render(request, 'order_confirmation.html', {'order': order, 'products': products})
 
 
 @login_required(login_url='/accounts/signin/')
@@ -63,6 +73,14 @@ def update_order_status(request, order_id):
         order = get_object_or_404(Order, id=order_id)
         order.status = new_status
         order.save()
+        subject = 'Order Status Update'
+        message = f'Your order #{order_id} status has been updated to {new_status}.'
+        email_from = settings.EMAIL_HOST_USER
+        recipient_list = [order.user.email]
+
+        # Use send_mail function
+        send_mail(subject, message, email_from, recipient_list)
+
         return redirect('order:order_list')
     else:
         pass

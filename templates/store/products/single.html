@@ -139,7 +139,9 @@
         </div>
 
         <div class="container recommended-products-container mt-5">
+        {% if recommended_products %}
             <h4 style="margin-bottom: 25px">Recommended from the same category</h4>
+        {% endif %}
             <div class="row row-cols-1 row-cols-md-5 g-3">
                 {% for recommended_product in recommended_products %}
                     <div class="col">
@@ -151,7 +153,13 @@
                             </a>
                             <div class="card-body recommended-product-card-body">
                                 <h5 class="card-title">{{ recommended_product.title }}</h5>
-                                <p class="card-text">{{ recommended_product.author }}</p>
+                                <p class="card-text">Rating: {{ recommended_product.author }}</p>
+                                {% if recommended_product.rating > 0 %}
+                                <p class = "card-text">{{ recommended_product.rating }} ⭐</p>
+                                {% else %}
+                                <p class = "card-text">No rating yet</p>
+                                {% endif %}
+
                             </div>
                         </div>
                     </div>
@@ -190,39 +198,42 @@
                 </div>
             {% endif %}
         </div>
-        <div class="container mt-5" style="margin-bottom: 50px">
-            <h2 style="margin-bottom: 25px">Customer Reviews</h2>
-            {% if product.reviews.exists %}
-                <div id="reviews-carousel" class="carousel slide" data-bs-ride="carousel" style="display: block;">
-                    <div class="carousel-inner">
-                        {% for review_list_item in product.reviews.all %}
-                            <div class="carousel-item {% if forloop.first %}active{% endif %}">
-                                <div class="card mx-auto" style="width: 18rem;">
+<div class="container mt-5" style="margin-bottom: 50px; max-width: 1200px;">
+    <h2 style="margin-bottom: 25px; text-align: center">Customer Reviews</h2>
+    {% if product.reviews.exists %}
+        <div id="reviews-carousel" class="carousel slide" data-bs-ride="carousel">
+            <div class="carousel-inner">
+                {% for review_list_item in product.reviews.all %}
+                    <div class="carousel-item {% if forloop.first %}active{% endif %}">
+                        <div class="row justify-content-center">
+                            <div class="col-md-8">
+                                <div class="card text-center">
                                     <div class="card-body">
                                         <h5 class="card-title">{{ review_list_item.user.username }}</h5>
                                         <p class="card-text">
-                                            Rating: {{ review_list_item.star_rating| floatformat:1 }}⭐</p>
+                                            Rating: {{ review_list_item.star_rating|floatformat:1 }}⭐</p>
                                         <p class="card-text">{{ review_list_item.review }}</p>
                                     </div>
                                 </div>
                             </div>
-                        {% endfor %}
+                        </div>
                     </div>
-                    <button class="carousel-control-prev" type="button" data-bs-target="#reviews-carousel"
-                            data-bs-slide="prev">
-                        <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-                        <span class="visually-hidden">Previous</span>
-                    </button>
-                    <button class="carousel-control-next" type="button" data-bs-target="#reviews-carousel"
-                            data-bs-slide="next">
-                        <span class="carousel-control-next-icon" aria-hidden="true"></span>
-                        <span class="visually-hidden">Next</span>
-                    </button>
-                </div>
-            {% else %}
-                <p>No reviews yet.</p>
-            {% endif %}
+                {% endfor %}
+            </div>
+            <button class="carousel-control-prev" type="button" data-bs-target="#reviews-carousel" data-bs-slide="prev">
+                <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                <span class="visually-hidden">Previous</span>
+            </button>
+            <button class="carousel-control-next" type="button" data-bs-target="#reviews-carousel" data-bs-slide="next">
+                <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                <span class="visually-hidden">Next</span>
+            </button>
         </div>
+    {% else %}
+        <p style="text-align: center">No reviews available.</p>
+    {% endif %}
+</div>
+
     </main>
     <script>
         $(document).ready(function () {

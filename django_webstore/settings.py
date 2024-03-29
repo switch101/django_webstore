@@ -118,3 +118,9 @@ STATICFILES_DIRS = [
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media/')
+
+EMAIL_BACKEND = "anymail.backends.brevo.EmailBackend"
+EMAIL_HOST_USER = "1a5hce4wuxoc@brevo-mail.com"
+ANYMAIL = {"BREVO_API_KEY": "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",
+
+           }
